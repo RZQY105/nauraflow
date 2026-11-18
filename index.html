@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>NeuraFlow AI — Unlimited Video Studio</title>
-  <link id="dynamicFavicon" rel="icon" type="image/png" />
+  <link id="dynamicFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Ccircle cx='50' cy='50' r='28' fill='none' stroke='%2338bdf8' stroke-width='6'/%3E%3Cpolygon points='44,38 64,50 44,62' fill='%23e879f9'/%3E%3C/svg%3E" />
   <link id="dynamicAppleIcon" rel="apple-touch-icon" />
   <link id="dynamicManifest" rel="manifest" />
   <meta name="theme-color" content="#090a0f" />
@@ -14,7 +14,12 @@
   <!-- Top Navbar -->
   <header class="topbar">
     <div class="brand">
-      <img id="appBrandLogo" alt="NeuraFlow Logo" class="brand-logo" />
+      <img
+        id="appBrandLogo"
+        alt="NeuraFlow"
+        class="brand-logo"
+        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%23e879f9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='120' rx='26' fill='%230f172a' stroke='url(%23g)' stroke-width='4'/%3E%3Ccircle cx='60' cy='60' r='32' fill='%23090a0f' stroke='url(%23g)' stroke-width='7'/%3E%3Cpolygon points='52,45 76,60 52,75' fill='url(%23g)'/%3E%3Ccircle cx='90' cy='28' r='5' fill='%2338bdf8'/%3E%3C/svg%3E"
+      />
       <div>
         <h1>NeuraFlow <span class="badge-pro">FLOW</span></h1>
         <p class="subtitle">AI Cinema & Multi-Scene Engine</p>
@@ -22,9 +27,9 @@
     </div>
 
     <div class="topbar-actions">
-      <div class="credit-pill" title="Mode lokal & free API aktif">
+      <div class="credit-pill" id="engineStatusPill" title="Status Engine AI">
         <span class="pulse-dot"></span>
-        <span>∞ Unlimited</span>
+        <span id="engineBadgeText">∞ Unlimited</span>
       </div>
       <button id="btnSettings" class="icon-btn" aria-label="Pengaturan API">⚙️</button>
     </div>
@@ -103,7 +108,6 @@
           <button type="button" id="btnAddScene" class="add-scene-btn">+ Tambah Scene</button>
         </div>
 
-        <!-- Container daftar card scene (di-render dinamis oleh app.js) -->
         <div id="scenesContainer" class="scenes-list"></div>
       </div>
 
@@ -160,13 +164,11 @@
           </div>
         </div>
 
-        <!-- Upload Audio Lokal -->
         <div id="customAudioGroup" class="control-item" style="margin-bottom: 10px;" hidden>
           <label for="voFileUpload">Pilih File Suara Rekaman (MP3 / WAV / M4A / OGG)</label>
           <input type="file" id="voFileUpload" accept="audio/*" />
         </div>
 
-        <!-- Gaya Subtitle -->
         <div class="control-item" style="margin-bottom: 10px;">
           <label for="captionStyle">Gaya Auto-Subtitle (Caption)</label>
           <select id="captionStyle">
@@ -177,7 +179,6 @@
           </select>
         </div>
 
-        <!-- Kontrol Volume -->
         <div class="controls-grid" style="margin-bottom: 0;">
           <div class="control-item">
             <label for="bgmVolume">Volume Musik: <span id="bgmVolLabel">45%</span></label>
@@ -231,7 +232,7 @@
     </section>
   </main>
 
-  <!-- Modal Pengaturan BYOK -->
+  <!-- Modal Pengaturan Engine & Hugging Face Wan2.1 -->
   <div id="settingsModal" class="modal-backdrop" hidden>
     <div class="modal-card">
       <div class="modal-head">
@@ -239,11 +240,19 @@
         <button id="btnCloseModal" class="icon-btn">✕</button>
       </div>
       <p class="modal-desc">
-        NeuraFlow menggunakan <strong>Character Lock + Multi-Scene Hybrid Engine</strong> (Pollinations AI Seed-Locked + Web Audio Synth + Canvas Renderer). Token Hugging Face opsional tersedia di bawah ini.
+        Jika <strong>Hugging Face API Token</strong> diisi, NeuraFlow otomatis memakai model video AI <strong>Wan2.1</strong> untuk menghasilkan gerakan video nyata. Jika kosong atau limit habis, otomatis beralih ke <strong>Unlimited Hybrid Engine</strong>.
       </p>
-      <div class="control-item">
+      <div class="control-item" style="margin-bottom: 10px;">
         <label for="hfApiKey">Hugging Face API Token (Opsional)</label>
         <input type="password" id="hfApiKey" placeholder="hf_xxxxxxxxxxxxxxxxxxxx" />
+      </div>
+      <div class="control-item">
+        <label for="hfModelSelect">Model Video AI (Saat Token Aktif)</label>
+        <select id="hfModelSelect">
+          <option value="Wan-AI/Wan2.1-T2V-1.3B">🎬 Wan2.1-T2V-1.3B (Cepat & Ringan)</option>
+          <option value="Wan-AI/Wan2.1-I2V-14B-480P">🖼️ Wan2.1-I2V-14B (Photo-to-Video)</option>
+          <option value="cerspense/zeroscope_v2_576w">⚡ Zeroscope v2 (Alternatif Cepat)</option>
+        </select>
       </div>
       <button id="btnSaveSettings" class="primary-btn" style="margin-top: 14px;">Simpan Konfigurasi</button>
     </div>

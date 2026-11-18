@@ -20,6 +20,11 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Memastikan elemen dengan atribut hidden selalu tertutup sempurna */
+[hidden] {
+  display: none !important;
+}
+
 body {
   background: radial-gradient(circle at top right, #1e1b4b 0%, var(--bg-main) 45%);
   color: var(--text-main);
@@ -51,6 +56,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .brand h1 {
@@ -112,6 +118,7 @@ body {
   border-radius: 10px;
   cursor: pointer;
   font-size: 1rem;
+  flex-shrink: 0;
 }
 
 /* Workspace Layout */
@@ -626,7 +633,12 @@ input[type="range"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   margin-bottom: 10px;
+}
+
+.modal-head h2 {
+  font-size: 1.12rem;
 }
 
 .modal-desc {

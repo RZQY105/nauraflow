@@ -205,8 +205,24 @@ hfModelSelect.value =
   localStorage.getItem("neuraflow_hf_model") || "Wan-AI/Wan2.1-T2V-1.3B";
 updateEngineBadge();
 
-btnSettings.onclick = () => (settingsModal.hidden = false);
-btnCloseModal.onclick = () => (settingsModal.hidden = true);
+// Pastikan modal tertutup saat halaman dimuat
+settingsModal.hidden = true;
+loaderOverlay.hidden = true;
+
+btnSettings.onclick = () => {
+  settingsModal.hidden = false;
+};
+
+btnCloseModal.onclick = () => {
+  settingsModal.hidden = true;
+};
+
+settingsModal.onclick = (e) => {
+  if (e.target === settingsModal) {
+    settingsModal.hidden = true;
+  }
+};
+
 btnSaveSettings.onclick = () => {
   localStorage.setItem("neuraflow_hf_key", hfApiKeyInput.value.trim());
   localStorage.setItem("neuraflow_hf_model", hfModelSelect.value);
@@ -506,7 +522,6 @@ function buildConsistentPrompt(sceneAction) {
   return parts.join(", ");
 }
 
-// Panggil Hugging Face Inference API (Wan2.1) jika token tersedia
 async function tryFetchHuggingFaceVideo(scene, sceneIndex) {
   const hfToken = (localStorage.getItem("neuraflow_hf_key") || "").trim();
   if (!hfToken || !hfToken.startsWith("hf_")) return null;
@@ -517,7 +532,6 @@ async function tryFetchHuggingFaceVideo(scene, sceneIndex) {
     scene.actionPrompt.trim() || "cinematic camera motion, natural movement"
   );
 
-  // Pilih model Image-to-Video otomatis jika user mengunggah foto pada scene tersebut
   const isPhotoScene = scene.sourceType === "photo" && scene.localDataUrl;
   const activeModel = isPhotoScene ? "Wan-AI/Wan2.1-I2V-14B-480P" : selectedModel;
 
@@ -548,7 +562,7 @@ async function tryFetchHuggingFaceVideo(scene, sceneIndex) {
     try {
       loaderStep.textContent = `Scene ${sceneIndex + 1}: Memanggil AI Video (${activeModel.split("/")[1]})...`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000); // Timeout 45 detik
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
 
       const response = await fetch(url, {
         method: "POST",
@@ -595,7 +609,6 @@ async function tryFetchHuggingFaceVideo(scene, sceneIndex) {
   return null;
 }
 
-// Fallback Visual Image (Pollinations Flux + Foto Lokal)
 function fetchFallbackSceneImage(scene, sceneIndex, width, height) {
   if (scene.sourceType === "photo" && scene.localImage) {
     return Promise.resolve({ type: "image", element: scene.localImage });
@@ -639,11 +652,9 @@ function fetchFallbackSceneImage(scene, sceneIndex, width, height) {
 }
 
 async function resolveSceneMedia(scene, sceneIndex, width, height) {
-  // 1. Coba generate video AI nyata lewat Hugging Face Wan2.1 jika token terpasang
   const hfVideoMedia = await tryFetchHuggingFaceVideo(scene, sceneIndex);
   if (hfVideoMedia) return hfVideoMedia;
 
-  // 2. Jika token kosong / kuota HF habis, langsung pakai Unlimited Hybrid Engine
   loaderStep.textContent = `Melukis Scene ${sceneIndex + 1}/${scenes.length} (Unlimited Engine)...`;
   return await fetchFallbackSceneImage(scene, sceneIndex, width, height);
 }
@@ -975,7 +986,7 @@ function setupMultiSceneAudio(audioCtx, scheduledVoClips, customFullVoBuffer, to
 }
 
 // =========================================================================
-// SEEK VIDEO HELPER & RENDER FRAME ADEGAN (MENDUKUNG KLIP VIDEO WAN2.1 & GAMBAR)
+// SEEK VIDEO HELPER & RENDER FRAME ADEGAN
 // =========================================================================
 
 function seekVideoElement(videoEl, targetTime) {
@@ -1020,7 +1031,6 @@ async function drawSceneMediaFrame(ctx, media, motion, grade, progressT, width, 
   const baseScale = Math.max(width / srcW, height / srcH);
   const ease = progressT * progressT * (3 - 2 * progressT);
 
-  // Jika sumber sudah berupa klip video AI Wan2.1, gunakan zoom halus agar gerakan asli tetap natural
   let scale = isVideo ? baseScale * 1.03 : baseScale * 1.12;
   let offsetX = 0;
   let offsetY = 0;
